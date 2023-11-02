@@ -3,10 +3,11 @@ model:
   model_type: pretrain_vicuna0
   max_txt_len: 160
   end_sym: "###"
-  low_resource: True
+  low_resource: False
   prompt_template: '###Human: {} ###Assistant: '
-  ckpt: 'please set this value to the path of pretrained checkpoint'
-
+  ckpt: '/mnt/petrelfs/lijingsong/MLLM/ShareGPT4V/Experiments/checkpoint/pretrained_minigpt4_7b.pth'
+  # ckpt: '/mnt/petrelfs/lijingsong/MLLM/ShareGPT4V/Experiments/MiniGPT-4/minigpt4/output/minigpt4_stage2_finetune/20231026000/checkpoint_4.pth'
+  # ckpt: '/mnt/petrelfs/lijingsong/MLLM/ShareGPT4V/Experiments/MiniGPT-4/minigpt4/output/minigpt4_stage2_finetune_ours/20231026125/checkpoint_4.pth'
 
 datasets:
   cc_sbu_align:

@@ -26,7 +26,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -158,27 +157,4 @@ cython_debug/
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-.idea/
-
-wandb/
-jobs/logs/
-*.out
-*ipynb
-.history/
-*.json
-*.sh
-.ipynb_common
-logs/
-results/
-prompts/
-output/
-ckpt/
-divide_vqa.py
-jobs/
-
-*.slurm
-slurm*
-sbatch_generate*
-eval_data/
-dataset/Evaluation.md
-jupyter_notebook.slurm
+#.idea/

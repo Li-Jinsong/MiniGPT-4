@@ -37,10 +37,16 @@ class CaptionDataset(BaseDataset, __DisplMixin):
         self.img_ids = {}
         n = 0
         for ann in self.annotation:
-            img_id = ann["image_id"]
-            if img_id not in self.img_ids.keys():
-                self.img_ids[img_id] = n
-                n += 1
+            if "image_id" in ann:
+                img_id = ann["image_id"]
+                if img_id not in self.img_ids.keys():
+                    self.img_ids[img_id] = n
+                    n += 1
+            elif "id" in ann:
+                img_id = ann["id"]
+                if img_id not in self.img_ids.keys():
+                    self.img_ids[img_id] = n
+                    n += 1
 
     def __getitem__(self, index):
 
