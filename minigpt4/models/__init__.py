@@ -15,7 +15,11 @@ from minigpt4.models.minigpt_base import MiniGPTBase
 from minigpt4.models.minigpt4 import MiniGPT4
 from minigpt4.models.minigpt_v2 import MiniGPTv2
 from minigpt4.processors.base_processor import BaseProcessor
+from minigpt4.conversation.conversation import Chat, StoppingCriteriaSub
 
+from minigpt4.common.config import Config
+from transformers import StoppingCriteriaList
+import argparse
 
 __all__ = [
     "load_model",
@@ -159,6 +163,60 @@ def load_model_and_preprocess(name, model_type, is_eval=False, device="cpu"):
 
     return model.to(device), vis_processors, txt_processors
 
+
+def load_from_cfg(cfg, ckpt=None, return_conv=False):
+    overall_config = OmegaConf.load(cfg)
+    model_config = overall_config.model
+    model_cls = registry.get_model_class(model_config.arch)
+
+    model_config_path = model_cls.default_config_path(model_type=model_config.model_type)
+    
+    model_config = OmegaConf.merge(
+            OmegaConf.load(model_config_path).model,
+            model_config,
+        )
+    model_config.prompt_path = '/mnt/petrelfs/lijingsong/MLLM/ShareGPT4V/Experiments/MiniGPT-4/prompts/alignment.txt'
+    print(model_config)
+    model = model_cls.from_config(model_config)
+    if ckpt is not None:
+        print (f"Load from {ckpt}")
+        state_dict = torch.load(ckpt, map_location='cpu')
+        if 'model' in state_dict:
+            state_dict = state_dict['model']
+        elif 'state_dict' in state_dict:
+            state_dict = state_dict['state_dict']
+        msg = model.load_state_dict(state_dict, strict=False)
+        print(msg)
+
+    model.eval()
+    if return_conv:
+        model = Chat(model, None)
+    return model
+
+
+def load_minigpt4_chat(cfg, gpu_id=0):
+    print('Initializing Chat')
+
+    args = argparse.Namespace()
+    args.cfg_path = cfg
+    args.gpu_id = gpu_id
+    args.options = ["key1=value1", "key2=value2"]
+    cfg = Config(args)
+
+    model_config = cfg.model_cfg
+    model_cls = registry.get_model_class(model_config.arch)
+    model = model_cls.from_config(model_config).to('cuda:{}'.format(gpu_id))
+
+    vis_processor_cfg = cfg.datasets_cfg.cc_sbu_align.vis_processor.train
+    vis_processor = registry.get_processor_class(vis_processor_cfg.name).from_config(vis_processor_cfg)
+
+    stop_words_ids = [[835], [2277, 29937]]
+    stop_words_ids = [torch.tensor(ids).to(device='cuda:{}'.format(gpu_id)) for ids in stop_words_ids]
+    stopping_criteria = StoppingCriteriaList([StoppingCriteriaSub(stops=stop_words_ids)])
+
+    chat = Chat(model, vis_processor, device='cuda:{}'.format(gpu_id), stopping_criteria=stopping_criteria)
+    print('Initialization Finished')
+    return chat
 
 class ModelZoo:
     """
